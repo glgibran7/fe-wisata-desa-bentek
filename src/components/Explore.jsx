@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { FiZap, FiSmartphone, FiShield } from "react-icons/fi";
 import { CiLocationOn } from "react-icons/ci";
+import coba from "../assets/images/tes.jpg";
 
 // Menambahkan gambar ke dalam objek fitur
 const explore = [
@@ -8,25 +9,25 @@ const explore = [
     icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
     title: "Agrowisata",
     desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: "path/to/your/image1.jpg", // Ganti dengan path gambar yang sesuai
+    image: coba,
   },
   {
     icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
     title: "Wisata Religi",
     desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: "path/to/your/image2.jpg", // Ganti dengan path gambar yang sesuai
+    image: coba,
   },
   {
     icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
     title: "Air Terjun Tiu Demper",
     desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: "path/to/your/image3.jpg", // Ganti dengan path gambar yang sesuai
+    image: coba,
   },
   {
     icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
     title: "Sentra Kerajinan Bambu",
     desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: "path/to/your/image3.jpg", // Ganti dengan path gambar yang sesuai
+    image: coba,
   },
 ];
 

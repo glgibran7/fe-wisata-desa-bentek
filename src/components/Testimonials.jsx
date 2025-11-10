@@ -29,7 +29,7 @@ export default function Testimonials() {
         initial={{ opacity: 0, y: -20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-3xl font-extrabold text-gray-800 mb-12"
+        className="text-2xl font-extrabold text-gray-800 mb-12"
       >
         Apa Kata Mereka
       </motion.h2>
