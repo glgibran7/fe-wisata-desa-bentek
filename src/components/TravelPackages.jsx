@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { CiLocationOn } from "react-icons/ci";
 import { FiCheckCircle } from "react-icons/fi";
 
-const whatsappNumber = "6287861664764"; // nomor WhatsApp tujuan
+const whatsappNumber = "6282867542132"; // nomor WhatsApp tujuan
 
 const travelPackages = [
   {
