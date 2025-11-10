@@ -52,7 +52,7 @@ export default function ContactSection() {
               <FaInstagram size={18} />
             </a>
             <a
-              href="https://desabentek.id"
+              href="https://bentek.nusadesa.id/"
               target="_blank"
               rel="noopener noreferrer"
               className="p-3 bg-gray-200/60 hover:bg-green-600 hover:text-white rounded-full transition"

@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 import { CiLocationOn } from "react-icons/ci";
 import { FiCheckCircle } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
 
-const whatsappNumber = "6282867542132"; // nomor WhatsApp tujuan
+const whatsappNumber = "6282867542132";
 
 const travelPackages = [
   {
@@ -41,23 +42,18 @@ const travelPackages = [
 ];
 
 export default function TravelPackages() {
-  // 🔹 Fungsi untuk membuat link WA dinamis
   const createWhatsAppLink = (pkg) => {
     const message = `Halo Admin Wisata Desa Bentek 👋%0ASaya tertarik untuk memesan *${pkg.name}*.%0A%0AInformasi paket:%0A- Deskripsi: ${pkg.desc}%0A- Harga: ${pkg.price}%0A%0AMohon info lebih lanjut mengenai ketersediaan jadwal dan cara pemesanan. Terima kasih! 🙏`;
     return `https://wa.me/${whatsappNumber}?text=${message}`;
   };
 
   return (
-    <section
-      id="packages"
-      className="py-14 bg-[#fcf2e8] text-center px-4 sm:px-6 lg:px-8"
-    >
-      {/* Judul Section */}
+    <section id="packages" className="py-16 bg-[#fcf2e8] text-center px-6">
       <motion.h2
-        initial={{ opacity: 0, y: -30 }}
+        initial={{ opacity: 0, y: -20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-3xl font-extrabold text-gray-800 mb-3"
+        className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-4"
       >
         Paket Perjalanan Wisata
       </motion.h2>
@@ -66,31 +62,32 @@ export default function TravelPackages() {
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="text-gray-600 mb-10 max-w-2xl mx-auto"
+        className="text-gray-600 mb-12 max-w-2xl mx-auto"
       >
-        Pilih paket perjalanan sesuai minatmu dan jelajahi berbagai spot menarik
-        di Desa Bentek.
+        Pilih paket sesuai minatmu dan nikmati pengalaman tak terlupakan di Desa
+        Bentek.
       </motion.p>
 
-      {/* Grid Paket */}
       <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
         {travelPackages.map((pkg, idx) => (
           <motion.div
             key={idx}
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: idx * 0.2 }}
+            transition={{ duration: 0.6, delay: idx * 0.15 }}
+            whileHover={{ scale: 1.02 }}
             viewport={{ once: true }}
-            className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition flex flex-col justify-between"
+            className="group relative bg-white/90 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col border border-orange-100"
           >
+            {/* Konten utama */}
             <div className="p-6 text-left flex-grow">
-              <h3 className="text-xl font-bold text-gray-800 mb-2">
+              <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition">
                 {pkg.name}
               </h3>
-              <p className="text-gray-600 mb-4">{pkg.desc}</p>
+              <p className="text-gray-600 mb-4 leading-relaxed">{pkg.desc}</p>
 
-              {/* Harga */}
-              <div className="text-lg font-bold text-red-600 mb-4">
+              {/* Harga (tetap di sini) */}
+              <div className="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-semibold px-4 py-1.5 rounded-full shadow mb-5">
                 {pkg.price}
               </div>
 
@@ -108,8 +105,8 @@ export default function TravelPackages() {
                     viewport={{ once: true }}
                     className="flex items-center gap-2 text-gray-700"
                   >
-                    <CiLocationOn className="text-red-600 text-lg flex-shrink-0" />
-                    <span className="font-medium">{spot}</span>
+                    <CiLocationOn className="text-orange-500 text-lg flex-shrink-0" />
+                    <span>{spot}</span>
                   </motion.li>
                 ))}
               </ul>
@@ -137,9 +134,9 @@ export default function TravelPackages() {
                 href={createWhatsAppLink(pkg)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-xl transition"
+                className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 rounded-xl transition-all shadow-md"
               >
-                Pesan Sekarang via WhatsApp
+                <FaWhatsapp className="text-xl" /> Pesan Sekarang
               </a>
             </div>
           </motion.div>

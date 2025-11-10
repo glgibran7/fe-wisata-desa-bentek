@@ -7,13 +7,13 @@ import coba from "../assets/images/tes.jpg";
 const explore = [
   {
     icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
-    title: "Agrowisata",
+    title: "Agrowisata Pohon Bakau",
     desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     image: coba,
   },
   {
     icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
-    title: "Wisata Religi",
+    title: "Vilhara",
     desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     image: coba,
   },

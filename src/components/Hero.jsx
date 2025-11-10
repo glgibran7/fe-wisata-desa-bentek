@@ -4,7 +4,6 @@ import logo from "../assets/images/logo_wisata_desa_bentek.png";
 import maps from "../assets/images/map_wisata_desa_bentek.png";
 
 export default function Hero() {
-  // Variants reusable untuk animasi masuk
   const fadeUp = {
     hidden: { opacity: 0, y: 50 },
     visible: (delay = 0) => ({
@@ -17,15 +16,15 @@ export default function Hero() {
   return (
     <section
       id="home"
-      className="relative flex flex-col md:flex-row items-center justify-center min-h-screen bg-[#fcf2e8] px-4 sm:px-8 md:px-16 py-12 overflow-hidden"
+      className="relative flex flex-col md:flex-row items-center justify-center min-h-screen bg-[#fcf2e8] px-4 sm:px-8 md:px-20 lg:px-12 py-12 overflow-hidden"
     >
       {/* Kiri: Logo + Teks */}
-      <div className="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left z-10">
+      <div className="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left z-10 md:pl-8 lg:pl-12">
         {/* Logo */}
         <motion.img
           src={logo}
           alt="Logo Wisata Desa Bentek"
-          className="w-[160px] sm:w-[200px] md:w-[230px] h-auto mb-4 drop-shadow-lg"
+          className="w-[160px] sm:w-[200px] md:w-[230px] h-auto mb-2 drop-shadow-lg md:-ml-6 lg:-ml-10"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.4 }}
