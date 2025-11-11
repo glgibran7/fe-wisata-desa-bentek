@@ -8,8 +8,13 @@ const whatsappNumber = "6282867542132";
 const travelPackages = [
   {
     name: "Paket Eksplor Alam",
-    desc: "Nikmati keindahan alam Desa Bentek dengan pemandangan menakjubkan dan udara sejuk.",
-    spots: ["Agrowisata", "Air Terjun Tiu Demper"],
+    desc: "Nikmati keindahan alam Desa Bentek dengan udara sejuk dan pemandangan menakjubkan.",
+    spots: [
+      "Tiu Demper",
+      "Villa Bintang",
+      "Sungai dan Sawah Desa Bentek",
+      "Pembibitan Pohon Kakao (Agrowisata)",
+    ],
     price: "Rp150.000",
     benefits: [
       "Pemandu wisata lokal",
@@ -19,8 +24,12 @@ const travelPackages = [
   },
   {
     name: "Paket Religi & Budaya",
-    desc: "Jelajahi sisi spiritual dan budaya lokal yang kaya di Desa Bentek.",
-    spots: ["Wisata Religi", "Sentra Kerajinan Bambu"],
+    desc: "Jelajahi sisi spiritual dan budaya lokal di Desa Bentek yang kaya akan tradisi.",
+    spots: [
+      "Vihara Bodhi Darma",
+      "Sentra Kerajinan Bambu",
+      "Sungai dan Sawah Desa Bentek",
+    ],
     price: "Rp200.000",
     benefits: [
       "Tur budaya & edukasi",
@@ -30,8 +39,14 @@ const travelPackages = [
   },
   {
     name: "Paket Petualangan Desa",
-    desc: "Rasakan petualangan seru dengan menjelajahi spot-spot unggulan pilihan kami.",
-    spots: ["Perkebunan Kopi", "Bukit Panorama", "Air Terjun Mini"],
+    desc: "Rasakan petualangan seru dengan mengunjungi spot-spot terbaik pilihan kami.",
+    spots: [
+      "Terjun Tiu Demper",
+      "Villa Bintang",
+      "Sungai dan Sawah Desa Bentek",
+      "Pembibitan Pohon Kakao (Agrowisata)",
+      "Sentra Kerajinan Bambu",
+    ],
     price: "Rp250.000",
     benefits: [
       "Pemandu profesional",
@@ -86,7 +101,7 @@ export default function TravelPackages() {
               </h3>
               <p className="text-gray-600 mb-4 leading-relaxed">{pkg.desc}</p>
 
-              {/* Harga (tetap di sini) */}
+              {/* Harga */}
               <div className="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-semibold px-4 py-1.5 rounded-full shadow mb-5">
                 {pkg.price}
               </div>
@@ -136,7 +151,7 @@ export default function TravelPackages() {
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 rounded-xl transition-all shadow-md"
               >
-                <FaWhatsapp className="text-xl" /> Pesan Sekarang
+                <FaWhatsapp className="text-xl" /> Booking Sekarang
               </a>
             </div>
           </motion.div>
