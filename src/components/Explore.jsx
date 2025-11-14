@@ -3,8 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CiLocationOn } from "react-icons/ci";
 import coba from "../assets/images/tes.jpg";
 import tiudemper from "../assets/images/tiudemper.webp";
-import vihara from "../assets/images/vihara.webp";
+import vihara from "../assets/images/vihara.jpg";
 import kakao from "../assets/images/kakao.jpg";
+import kerajinanbambu from "../assets/images/kerajinanbambu.jpg";
+import sungaisawah from "../assets/images/sawah.jpg";
+import villabintang from "../assets/images/villabintang.jpg";
 
 const explore = [
   {
@@ -18,8 +21,8 @@ const explore = [
     icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
     title: "Villa Bintang",
     desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: coba,
-    link: "https://maps.app.goo.gl/ZLjFzArkuF9wKMTb6",
+    image: villabintang,
+    link: "https://maps.app.goo.gl/xKGiNbFc55RTpt8A7",
   },
   {
     icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
@@ -32,7 +35,7 @@ const explore = [
     icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
     title: "Sungai dan Sawah Desa Bentek",
     desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: coba,
+    image: sungaisawah,
     link: "https://goo.gl/maps/1m8NqG89cAq3AjtU6",
   },
   {
@@ -46,7 +49,7 @@ const explore = [
     icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
     title: "Sentra Kerajinan Bambu",
     desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: coba,
+    image: kerajinanbambu,
     link: "https://goo.gl/maps/YT2RpVtY2yGkFJhP7",
   },
 ];
