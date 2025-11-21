@@ -1,64 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CiLocationOn } from "react-icons/ci";
-import coba from "../assets/images/tes.jpg";
-import tiudemper from "../assets/images/tiudemper.webp";
-import vihara from "../assets/images/vihara.jpg";
-import kakao from "../assets/images/kakao.jpg";
-import kerajinanbambu from "../assets/images/kerajinanbambu.jpg";
-import sungaisawah from "../assets/images/sawah.jpg";
-import villabintang from "../assets/images/villabintang.jpg";
-
-const explore = [
-  {
-    icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
-    title: "Lokok Segara (Tiu Demper)",
-    desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: tiudemper,
-    link: "https://maps.app.goo.gl/2eRYVRg6VUdZWYNx5",
-  },
-  {
-    icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
-    title: "Villa Bintang",
-    desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: villabintang,
-    link: "https://maps.app.goo.gl/xKGiNbFc55RTpt8A7",
-  },
-  {
-    icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
-    title: "Vihara Bodhi Dharma",
-    desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: vihara,
-    link: " https://maps.app.goo.gl/1Cke2pQ3sZYYWePq6",
-  },
-  {
-    icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
-    title: "Sungai dan Sawah Desa Bentek",
-    desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: sungaisawah,
-    link: "https://goo.gl/maps/1m8NqG89cAq3AjtU6",
-  },
-  {
-    icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
-    title: "Pembibitan Pohon Kakao (Agrowisata)",
-    desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: kakao,
-    link: "https://goo.gl/maps/1m8NqG89cAq3AjtU6",
-  },
-  {
-    icon: <CiLocationOn className="w-10 h-10 text-red-600" />,
-    title: "Sentra Kerajinan Bambu",
-    desc: "lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    image: kerajinanbambu,
-    link: "https://goo.gl/maps/YT2RpVtY2yGkFJhP7",
-  },
-];
+import Api from "../utils/Api.jsx";
 
 export default function Explore() {
   const [showModal, setShowModal] = useState(false);
   const [selectedLink, setSelectedLink] = useState("");
+  const [destinations, setDestinations] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await Api.get("/destinasi");
+        setDestinations(res.data);
+      } catch (error) {
+        console.error("Gagal mengambil destinasi:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleOpenMap = (link) => {
+    if (!link) return; // blok kalau maps_url belum ada
     setSelectedLink(link);
     setShowModal(true);
   };
@@ -81,6 +44,7 @@ export default function Explore() {
       >
         The best place to find
       </motion.h2>
+
       <motion.h2
         initial={{ opacity: 0, y: -20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -92,25 +56,47 @@ export default function Explore() {
 
       {/* CARD GRID */}
       <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-        {explore.map((item, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.2 }}
-            onClick={() => handleOpenMap(item.link)}
-            className="p-6 bg-white rounded-2xl shadow hover:shadow-2xl hover:-translate-y-1 transition cursor-pointer border border-gray-100"
-          >
-            <img
-              src={item.image}
-              alt={item.title}
-              className="w-full h-48 object-cover rounded-xl mb-4 transition-transform duration-300 group-hover:scale-105"
-            />
-            <div className="flex justify-center mb-4">{item.icon}</div>
-            <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-            <p className="text-gray-600">{item.desc}</p>
-          </motion.div>
-        ))}
+        {destinations.map((item, index) => {
+          const hasMap = !!item.maps_url; // true kalau maps_url ada
+
+          return (
+            <motion.div
+              key={item.id_destination}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.2 }}
+              onClick={() => hasMap && handleOpenMap(item.maps_url)}
+              className={`p-6 bg-white rounded-2xl shadow border border-gray-100 transition 
+                ${
+                  hasMap
+                    ? "cursor-pointer hover:shadow-2xl hover:-translate-y-1"
+                    : "cursor-not-allowed opacity-70"
+                }`}
+            >
+              <img
+                src={
+                  item.image_url ||
+                  "https://via.placeholder.com/400x300?text=No+Image"
+                }
+                alt={item.name}
+                className="w-full h-48 object-cover rounded-xl mb-4"
+              />
+
+              <div className="flex justify-center mb-4">
+                <CiLocationOn className="w-10 h-10 text-red-600" />
+              </div>
+
+              <h3 className="text-xl font-semibold mb-2">{item.name}</h3>
+              <p className="text-gray-600">{item.description}</p>
+
+              {!hasMap && (
+                <p className="text-xs text-red-500 mt-2">
+                  Lokasi Maps belum tersedia
+                </p>
+              )}
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* MODAL */}
@@ -147,6 +133,7 @@ export default function Explore() {
                 >
                   Batal
                 </motion.button>
+
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={confirmOpen}

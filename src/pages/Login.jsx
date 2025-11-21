@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FiLock, FiMail } from "react-icons/fi";
 import logo from "../assets/images/logo_wisata_desa_bentek.png"; // pastikan path benar
+import Api from "../utils/Api";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -11,18 +12,34 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false); // state untuk spinner
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
-    if (email === "admin" && password === "admin") {
-      setLoading(true); // tampilkan spinner/loading
-      setTimeout(() => {
-        setLoading(false);
-        navigate("/admin"); // redirect ke dashboard
-      }, 500); // delay 0.5 detik agar terlihat spinner
-    } else {
-      setError("Email atau Password salah. Silakan coba lagi.");
+    try {
+      const res = await Api.post("/auth/login", {
+        email,
+        password,
+      });
+
+      const { token } = res.data;
+
+      // Simpan token ke localStorage
+      localStorage.setItem("token", token);
+
+      navigate("/admin");
+    } catch (err) {
+      console.log(err);
+
+      // Jika backend mengirim pesan error
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Terjadi kesalahan saat login.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 

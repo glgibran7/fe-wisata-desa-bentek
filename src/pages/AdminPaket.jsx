@@ -1,120 +1,144 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-
-// Dummy Paket Wisata
-const dummyPaket = [
-  {
-    nama: "Paket Eksplor Alam",
-    deskripsi: "Nikmati keindahan alam Desa Bentek...",
-    harga: 150000,
-    spots: [
-      "Tiu Demper",
-      "Villa Bintang",
-      "Sungai dan Sawah",
-      "Pembibitan Pohon Kakao",
-    ],
-    benefits: [
-      "Pemandu wisata lokal",
-      "Air mineral & snack",
-      "Tiket masuk lokasi wisata",
-    ],
-    gambar: "",
-  },
-  {
-    nama: "Paket Religi & Budaya",
-    deskripsi: "Jelajahi sisi spiritual dan budaya lokal...",
-    harga: 200000,
-    spots: [
-      "Vihara Bodhi Dharma",
-      "Sentra Kerajinan Bambu",
-      "Sungai dan Sawah",
-    ],
-    benefits: [
-      "Tur budaya & edukasi",
-      "Souvenir kerajinan bambu",
-      "Makan siang khas Desa Bentek",
-    ],
-    gambar: "",
-  },
-  {
-    nama: "Paket Petualangan Desa",
-    deskripsi: "Rasakan petualangan seru...",
-    harga: 250000,
-    spots: [
-      "Tiu Demper",
-      "Villa Bintang",
-      "Sungai dan Sawah",
-      "Pembibitan Pohon Kakao",
-      "Sentra Kerajinan Bambu",
-    ],
-    benefits: [
-      "Pemandu profesional",
-      "Peralatan trekking",
-      "Minuman hangat di akhir perjalanan",
-    ],
-    gambar: "",
-  },
-];
+import Api from "../utils/Api.jsx";
 
 export default function AdminPaket() {
-  const [paket, setPaket] = useState(dummyPaket);
+  const [paket, setPaket] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
+  const [destinationsList, setDestinationsList] = useState([]);
+
   const [formData, setFormData] = useState({
+    id: null,
     nama: "",
     deskripsi: "",
     harga: "",
-    spots: [],
+    destinations: [],
     benefits: [],
     gambar: "",
   });
 
   const navigate = useNavigate();
 
-  // Upload gambar
+  // GET DATA /paket
+  useEffect(() => {
+    const fetchPaket = async () => {
+      try {
+        const res = await Api.get("/paket");
+        setPaket(res.data);
+      } catch (err) {
+        console.error("Gagal mengambil paket:", err);
+      }
+    };
+
+    fetchPaket();
+  }, []);
+
+  useEffect(() => {
+    const fetchDestinasi = async () => {
+      try {
+        const res = await Api.get("/destinasi");
+        setDestinationsList(res.data);
+      } catch (err) {
+        console.error("Gagal mengambil destinasi:", err);
+      }
+    };
+
+    fetchDestinasi();
+  }, []);
+
+  // UPLOAD IMAGE BASE64
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     const reader = new FileReader();
     reader.onloadend = () =>
       setFormData({ ...formData, gambar: reader.result });
     reader.readAsDataURL(file);
   };
 
-  // Submit form tambah/edit
-  const handleSubmit = (e) => {
+  // SUBMIT TAMBAH / EDIT
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editIndex !== null) {
-      const updated = [...paket];
-      updated[editIndex] = formData;
-      setPaket(updated);
-      setEditIndex(null);
-    } else {
-      setPaket([...paket, formData]);
+
+    const payload = {
+      name: formData.nama,
+      description: formData.deskripsi,
+      price: Number(formData.harga),
+      destinations: formData.destinations,
+      benefits: formData.benefits,
+      image_url: formData.gambar,
+    };
+
+    try {
+      if (editIndex !== null) {
+        // UPDATE
+        await Api.put(`/paket/${formData.id}`, payload);
+
+        const updated = [...paket];
+        updated[editIndex] = { ...updated[editIndex], ...payload };
+        setPaket(updated);
+      } else {
+        // CREATE
+        const res = await Api.post("/paket", payload);
+        setPaket([...paket, res.data]);
+      }
+
+      resetForm();
+    } catch (err) {
+      console.error("Gagal menyimpan paket:", err);
     }
+  };
+
+  const resetForm = () => {
     setFormData({
+      id: null,
       nama: "",
       deskripsi: "",
       harga: "",
-      spots: [],
+      destinations: [],
       benefits: [],
       gambar: "",
     });
+    setEditIndex(null);
     setFormOpen(false);
   };
 
-  // Edit paket
+  // =======================
+  // EDIT PAKET
+  // =======================
   const handleEdit = (index) => {
+    const item = paket[index];
+
     setEditIndex(index);
-    setFormData(paket[index]);
+    setFormData({
+      id: item.id_package,
+      nama: item.name,
+      deskripsi: item.description,
+      harga: item.price,
+      destinations: item.destinations,
+      benefits: item.benefits,
+      gambar: item.image_url,
+    });
+
     setFormOpen(true);
   };
 
-  // Hapus paket
-  const handleDelete = (index) => {
-    if (window.confirm("Yakin ingin menghapus paket ini?")) {
+  // =======================
+  // DELETE /paket/:id
+  // =======================
+  const handleDelete = async (index) => {
+    const item = paket[index];
+
+    if (!window.confirm("Yakin ingin menghapus paket ini?")) return;
+
+    try {
+      await Api.delete(`/paket/${item.id_package}`);
       setPaket(paket.filter((_, i) => i !== index));
+    } catch (err) {
+      console.error("Gagal menghapus paket:", err);
     }
   };
 
@@ -123,18 +147,18 @@ export default function AdminPaket() {
       {/* Header */}
       <header className="flex justify-between items-center mb-10">
         <div className="flex items-center gap-4">
-          {/* Tombol Back */}
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-[#1c4444] hover:text-[#163737] px-3 py-1 rounded-md"
-            aria-label="Kembali"
           >
-            <FaArrowLeft size={20} /> {/* Icon back */}
+            <FaArrowLeft size={20} />
           </button>
+
           <h1 className="text-3xl font-bold text-[#1c4444]">
             Manajemen Paket Wisata
           </h1>
         </div>
+
         <button
           onClick={() => setFormOpen(true)}
           className="flex items-center gap-2 bg-[#c97b2f] text-white px-4 py-2 rounded-lg hover:bg-[#a86323] transition"
@@ -143,31 +167,56 @@ export default function AdminPaket() {
         </button>
       </header>
 
-      {/* Daftar Paket */}
+      {/* LIST PAKET */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {paket.map((item, index) => (
           <div
-            key={index}
+            key={item.id_package}
             className="bg-white rounded-xl shadow-md overflow-hidden border-l-4 border-[#1c4444]"
           >
-            {item.gambar && (
+            {item.image_url && (
               <img
-                src={item.gambar}
-                alt={item.nama}
+                src={item.image_url}
+                alt={item.name}
                 className="w-full h-40 object-cover"
               />
             )}
+
             <div className="p-4">
               <h3 className="text-lg font-semibold text-[#1c4444]">
-                {item.nama}
+                {item.name}
               </h3>
-              <p className="text-gray-600 text-sm mt-2">{item.deskripsi}</p>
-              <p className="text-[#1c4444] font-bold mt-2">
-                Rp {Number(item.harga).toLocaleString()}
+
+              <p className="text-gray-600 text-sm mt-2">{item.description}</p>
+
+              <p className="font-bold text-[#1c4444] mt-2">
+                Rp {Number(item.price).toLocaleString()}
               </p>
+
               <p className="text-sm mt-1 font-semibold">
-                Destinasi: {item.spots.join(", ")}
+                Destinasi:{" "}
+                {item.destinations
+                  .map((id) => {
+                    const dest = destinationsList.find(
+                      (d) => d.id_destination === id
+                    );
+                    return dest ? dest.name : `ID ${id}`;
+                  })
+                  .join(", ")}
               </p>
+              {/* Benefits */}
+              <div className="mt-2">
+                <p className="text-sm font-semibold text-[#1c4444]">
+                  Benefits:
+                </p>
+                <ul className="list-disc list-inside text-sm text-gray-700">
+                  {item.benefits && item.benefits.length > 0 ? (
+                    item.benefits.map((b, i) => <li key={i}>{b}</li>)
+                  ) : (
+                    <li>-</li>
+                  )}
+                </ul>
+              </div>
 
               <div className="flex justify-end gap-3 mt-4">
                 <button
@@ -176,6 +225,7 @@ export default function AdminPaket() {
                 >
                   <FaEdit size={18} />
                 </button>
+
                 <button
                   onClick={() => handleDelete(index)}
                   className="text-red-600 hover:text-red-800"
@@ -188,16 +238,16 @@ export default function AdminPaket() {
         ))}
       </div>
 
-      {/* Modal Form */}
+      {/* MODAL FORM */}
       {formOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg max-h-[90vh] overflow-y-auto relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-6">
+          <div className="bg-white p-6 rounded-xl w-full max-w-lg shadow-lg max-h-[90vh] overflow-y-auto relative">
             <h2 className="text-xl font-semibold text-[#1c4444] mb-4">
               {editIndex !== null ? "Edit Paket" : "Tambah Paket Baru"}
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Nama Paket */}
+              {/* Nama */}
               <div>
                 <label className="block mb-1 text-[#1c4444] font-medium">
                   Nama Paket
@@ -213,10 +263,10 @@ export default function AdminPaket() {
                 />
               </div>
 
-              {/* Deskripsi Paket */}
+              {/* Deskripsi */}
               <div>
                 <label className="block mb-1 text-[#1c4444] font-medium">
-                  Deskripsi Paket
+                  Deskripsi
                 </label>
                 <textarea
                   className="w-full p-3 border rounded-lg"
@@ -226,47 +276,76 @@ export default function AdminPaket() {
                     setFormData({ ...formData, deskripsi: e.target.value })
                   }
                   required
-                />
+                ></textarea>
               </div>
 
               {/* Harga */}
               <div>
                 <label className="block mb-1 text-[#1c4444] font-medium">
-                  Harga Paket (Rp)
+                  Harga Paket
                 </label>
                 <input
                   type="number"
                   className="w-full p-3 border rounded-lg"
                   value={formData.harga}
                   onChange={(e) =>
-                    setFormData({ ...formData, harga: Number(e.target.value) })
+                    setFormData({
+                      ...formData,
+                      harga: Number(e.target.value),
+                    })
                   }
                   required
                 />
               </div>
 
-              {/* Destinasi */}
+              {/* Destinations */}
               <div>
                 <label className="block mb-1 text-[#1c4444] font-medium">
-                  Destinasi (pisahkan dengan koma)
+                  Pilih Destinasi
                 </label>
-                <input
-                  type="text"
-                  className="w-full p-3 border rounded-lg"
-                  value={formData.spots.join(", ")}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      spots: e.target.value.split(",").map((s) => s.trim()),
-                    })
-                  }
-                />
+
+                <div className="grid grid-cols-2 gap-2">
+                  {destinationsList.map((d) => (
+                    <label
+                      key={d.id_destination}
+                      className="flex items-center gap-2"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.destinations.includes(
+                          d.id_destination
+                        )}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            // Tambah ID
+                            setFormData({
+                              ...formData,
+                              destinations: [
+                                ...formData.destinations,
+                                d.id_destination,
+                              ],
+                            });
+                          } else {
+                            // Hapus ID
+                            setFormData({
+                              ...formData,
+                              destinations: formData.destinations.filter(
+                                (x) => x !== d.id_destination
+                              ),
+                            });
+                          }
+                        }}
+                      />
+                      <span>{d.name}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
 
-              {/* Benefit */}
+              {/* Benefits */}
               <div>
                 <label className="block mb-1 text-[#1c4444] font-medium">
-                  Benefit (pisahkan dengan koma)
+                  Benefit (pisahkan koma)
                 </label>
                 <input
                   type="text"
@@ -294,7 +373,6 @@ export default function AdminPaket() {
                 />
               </div>
 
-              {/* Preview Gambar */}
               {formData.gambar && (
                 <img
                   src={formData.gambar}
@@ -303,50 +381,26 @@ export default function AdminPaket() {
                 />
               )}
 
-              {/* Tombol */}
-              <div className="flex gap-3 justify-end mt-4">
+              <div className="flex justify-end gap-4 pt-4">
                 <button
                   type="submit"
-                  className="bg-[#1c4444] text-white px-4 py-2 rounded-lg hover:bg-[#163737] transition"
+                  className="bg-[#1c4444] text-white px-4 py-2 rounded-lg hover:bg-[#163737]"
                 >
                   Simpan
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setFormOpen(false);
-                    setEditIndex(null);
-                    setFormData({
-                      nama: "",
-                      deskripsi: "",
-                      harga: "",
-                      spots: [],
-                      benefits: [],
-                      gambar: "",
-                    });
-                  }}
-                  className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+                  onClick={resetForm}
+                  className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500"
                 >
                   Batal
                 </button>
               </div>
             </form>
 
-            {/* Tombol tutup modal */}
             <button
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl font-bold"
-              onClick={() => {
-                setFormOpen(false);
-                setEditIndex(null);
-                setFormData({
-                  nama: "",
-                  deskripsi: "",
-                  harga: "",
-                  spots: [],
-                  benefits: [],
-                  gambar: "",
-                });
-              }}
+              className="absolute top-3 right-3 text-2xl"
+              onClick={resetForm}
             >
               ×
             </button>
