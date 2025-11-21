@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-scroll";
 import { Link as RouterLink } from "react-router-dom"; // Import untuk navigasi ke halaman login
-import logo from "../assets/images/logo_wisata_desa_bentek.png";
+import logo from "../assets/icons/logo_putih.png";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -28,7 +28,7 @@ export default function Navbar() {
         </div>
 
         {/* === Menu Desktop === */}
-        <div className="hidden md:flex space-x-8 text-white">
+        <div className="hidden md:flex items-center space-x-8 text-white">
           {menuItems.map((item) => (
             <Link
               key={item.to}
@@ -47,7 +47,7 @@ export default function Navbar() {
           {/* === Tombol Login === */}
           <RouterLink
             to="/login"
-            className="cursor-pointer text-white bg-[#c97b2f] hover:bg-[#a86323] px-3 py-1.5 rounded-md transition-colors"
+            className="cursor-pointer text-white bg-[#c97b2f] hover:bg-[#a86323] px-3 py-1.5 rounded-2xl transition-colors"
           >
             Login
           </RouterLink>
