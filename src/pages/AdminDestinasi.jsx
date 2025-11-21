@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import tiudemper from "../assets/images/tiudemper.webp";
 import vihara from "../assets/images/vihara.jpg";
 import kerajinanbambu from "../assets/images/kerajinanbambu.jpg";
@@ -33,6 +34,8 @@ export default function AdminDestinasi() {
     deskripsi: "",
     gambar: "",
   });
+
+  const navigate = useNavigate();
 
   // Load data
   useEffect(() => {
@@ -100,9 +103,19 @@ export default function AdminDestinasi() {
     <div className="min-h-screen bg-[#fcf2e8] p-6">
       {/* Header */}
       <header className="flex justify-between items-center mb-10">
-        <h1 className="text-3xl font-bold text-[#1c4444]">
-          Manajemen Destinasi Wisata
-        </h1>
+        <div className="flex items-center gap-4">
+          {/* Tombol Back */}
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-[#1c4444] hover:text-[#163737] px-3 py-1 rounded-md"
+            aria-label="Kembali"
+          >
+            <FaArrowLeft size={20} /> {/* Icon back */}
+          </button>
+          <h1 className="text-3xl font-bold text-[#1c4444]">
+            Manajemen Destinasi Wisata
+          </h1>
+        </div>
 
         <button
           onClick={() => setFormOpen(true)}

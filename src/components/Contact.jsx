@@ -24,7 +24,7 @@ export default function ContactSection() {
         {/* 1️⃣ Tentang */}
         <div>
           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-5">
-            Tentang <span className="text-green-700">Desa Bentek</span>
+            Tentang <span className="text-green-700">Wisata Desa Bentek</span>
           </h2>
           <p className="text-gray-700 leading-relaxed text-base">
             Desa Wisata Bentek di Lombok Utara menawarkan keindahan alam,

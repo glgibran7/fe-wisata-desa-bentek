@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import tiudemper from "../assets/images/tiudemper.webp";
 import vihara from "../assets/images/vihara.jpg";
 import kakao from "../assets/images/kakao.jpg";
@@ -31,6 +32,7 @@ export default function AdminBlog() {
     isi: "",
     gambar: "",
   });
+  const navigate = useNavigate();
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -71,7 +73,17 @@ export default function AdminBlog() {
     <div className="min-h-screen bg-[#fcf2e8] p-6">
       {/* Header */}
       <header className="flex justify-between items-center mb-10">
-        <h1 className="text-3xl font-bold text-[#1c4444]">Manajemen Blog</h1>
+        <div className="flex items-center gap-4">
+          {/* Tombol Back */}
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-[#1c4444] hover:text-[#163737] px-3 py-1 rounded-md"
+            aria-label="Kembali"
+          >
+            <FaArrowLeft size={20} /> {/* Icon back */}
+          </button>
+          <h1 className="text-3xl font-bold text-[#1c4444]">Manajemen Blog</h1>
+        </div>
         <button
           onClick={() => setFormOpen(true)}
           className="flex items-center gap-2 bg-[#c97b2f] text-white px-4 py-2 rounded-lg hover:bg-[#a86323] transition"
