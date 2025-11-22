@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import Api from "../utils/Api";
 import { motion } from "framer-motion";
 import { CiLocationOn } from "react-icons/ci";
 import { FiCheckCircle } from "react-icons/fi";
@@ -5,60 +7,47 @@ import { FaWhatsapp } from "react-icons/fa";
 
 const whatsappNumber = "6282867542132";
 
-const travelPackages = [
-  {
-    name: "Paket Eksplor Alam",
-    desc: "Nikmati keindahan alam Desa Bentek dengan udara sejuk dan pemandangan menakjubkan.",
-    spots: [
-      "Tiu Demper",
-      "Villa Bintang",
-      "Sungai dan Sawah Desa Bentek",
-      "Pembibitan Pohon Kakao (Agrowisata)",
-    ],
-    price: "Rp150.000",
-    benefits: [
-      "Pemandu wisata lokal",
-      "Air mineral & snack",
-      "Tiket masuk lokasi wisata",
-    ],
-  },
-  {
-    name: "Paket Religi & Budaya",
-    desc: "Jelajahi sisi spiritual dan budaya lokal di Desa Bentek yang kaya akan tradisi.",
-    spots: [
-      "Vihara Bodhi Darma",
-      "Sentra Kerajinan Bambu",
-      "Sungai dan Sawah Desa Bentek",
-    ],
-    price: "Rp200.000",
-    benefits: [
-      "Tur budaya & edukasi",
-      "Souvenir kerajinan bambu",
-      "Makan siang khas Desa Bentek",
-    ],
-  },
-  {
-    name: "Paket Petualangan Desa",
-    desc: "Rasakan petualangan seru dengan mengunjungi spot-spot terbaik pilihan kami.",
-    spots: [
-      "Terjun Tiu Demper",
-      "Villa Bintang",
-      "Sungai dan Sawah Desa Bentek",
-      "Pembibitan Pohon Kakao (Agrowisata)",
-      "Sentra Kerajinan Bambu",
-    ],
-    price: "Rp250.000",
-    benefits: [
-      "Pemandu profesional",
-      "Peralatan trekking",
-      "Minuman hangat di akhir perjalanan",
-    ],
-  },
-];
-
 export default function TravelPackages() {
+  const [packages, setPackages] = useState([]);
+  const [destinations, setDestinations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch paket + destinasi
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const [paketRes, destRes] = await Promise.all([
+          Api.get("/paket"),
+          Api.get("/destinasi"),
+        ]);
+
+        setPackages(paketRes.data);
+        setDestinations(destRes.data);
+      } catch (err) {
+        console.error("Gagal memuat paket:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAll();
+  }, []);
+
+  // Convert ID destinasi ke nama
+  const getDestinationNames = (ids = []) => {
+    return ids
+      .map((id) => {
+        const found = destinations.find((d) => d.id_destination === id);
+        return found ? found.name : `ID ${id}`;
+      })
+      .filter(Boolean);
+  };
+
   const createWhatsAppLink = (pkg) => {
-    const message = `Halo Admin Wisata Desa Bentek 👋%0ASaya tertarik untuk memesan *${pkg.name}*.%0A%0AInformasi paket:%0A- Deskripsi: ${pkg.desc}%0A- Harga: ${pkg.price}%0A%0AMohon info lebih lanjut mengenai ketersediaan jadwal dan cara pemesanan. Terima kasih! 🙏`;
+    const message = `Halo Admin Wisata Desa Bentek 👋%0ASaya tertarik untuk memesan *${
+      pkg.name
+    }*.%0A%0AInformasi paket:%0A- Deskripsi: ${
+      pkg.description
+    }%0A- Harga: Rp${pkg.price.toLocaleString()}%0A%0AMohon info lebih lanjut mengenai ketersediaan jadwal dan cara pemesanan. Terima kasih! 🙏`;
     return `https://wa.me/${whatsappNumber}?text=${message}`;
   };
 
@@ -83,80 +72,112 @@ export default function TravelPackages() {
         Bentek.
       </motion.p>
 
-      <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
-        {travelPackages.map((pkg, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: idx * 0.15 }}
-            whileHover={{ scale: 1.02 }}
-            viewport={{ once: true }}
-            className="group relative bg-white/90 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col border border-orange-100"
-          >
-            {/* Konten utama */}
-            <div className="p-6 text-left flex-grow">
-              <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition">
-                {pkg.name}
-              </h3>
-              <p className="text-gray-600 mb-4 leading-relaxed">{pkg.desc}</p>
+      {/* LOADING SKELETON */}
+      {loading ? (
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-80 bg-white rounded-2xl animate-pulse shadow"
+            ></div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
+          {packages.map((pkg, idx) => {
+            const spotNames = getDestinationNames(pkg.destinations);
 
-              {/* Harga */}
-              <div className="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-semibold px-4 py-1.5 rounded-full shadow mb-5">
-                {pkg.price}
-              </div>
-
-              {/* Daftar Spot Wisata */}
-              <h4 className="font-semibold text-gray-800 mb-2">
-                Spot yang dikunjungi:
-              </h4>
-              <ul className="space-y-2 mb-4">
-                {pkg.spots.map((spot, sidx) => (
-                  <motion.li
-                    key={sidx}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ delay: sidx * 0.1 }}
-                    viewport={{ once: true }}
-                    className="flex items-center gap-2 text-gray-700"
-                  >
-                    <CiLocationOn className="text-orange-500 text-lg flex-shrink-0" />
-                    <span>{spot}</span>
-                  </motion.li>
-                ))}
-              </ul>
-
-              {/* Benefit Paket */}
-              <h4 className="font-semibold text-gray-800 mb-2">
-                Benefit paket:
-              </h4>
-              <ul className="space-y-2">
-                {pkg.benefits.map((benefit, bidx) => (
-                  <li
-                    key={bidx}
-                    className="flex items-center gap-2 text-gray-700"
-                  >
-                    <FiCheckCircle className="text-green-600 text-lg flex-shrink-0" />
-                    <span>{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Tombol Pesan Sekarang */}
-            <div className="p-6 pt-0">
-              <a
-                href={createWhatsAppLink(pkg)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 rounded-xl transition-all shadow-md"
+            return (
+              <motion.div
+                key={pkg.id_package}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: idx * 0.15 }}
+                whileHover={{ scale: 1.02 }}
+                viewport={{ once: true }}
+                className="group relative bg-white/90 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col border border-orange-100"
               >
-                <FaWhatsapp className="text-xl" /> Booking Sekarang
-              </a>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+                {/* IMAGE (if exist) */}
+                {pkg.image_url && (
+                  <img
+                    src={pkg.image_url}
+                    alt={pkg.name}
+                    className="w-full h-48 object-cover"
+                  />
+                )}
+
+                {/* Konten utama */}
+                <div className="p-6 text-left flex-grow">
+                  <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-orange-600 transition">
+                    {pkg.name}
+                  </h3>
+
+                  <p className="text-gray-600 mb-4 leading-relaxed">
+                    {pkg.description}
+                  </p>
+
+                  {/* Harga */}
+                  <div className="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-semibold px-4 py-1.5 rounded-full shadow mb-5">
+                    Rp{pkg.price.toLocaleString()}
+                  </div>
+
+                  {/* Destinasi */}
+                  <h4 className="font-semibold text-gray-800 mb-2">
+                    Spot yang dikunjungi:
+                  </h4>
+                  <ul className="space-y-2 mb-4">
+                    {spotNames.map((spot, i) => (
+                      <motion.li
+                        key={i}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        viewport={{ once: true }}
+                        className="flex items-center gap-2 text-gray-700"
+                      >
+                        <CiLocationOn className="text-orange-500 text-lg flex-shrink-0" />
+                        <span>{spot}</span>
+                      </motion.li>
+                    ))}
+                  </ul>
+
+                  {/* Benefits */}
+                  <h4 className="font-semibold text-gray-800 mb-2">
+                    Benefit paket:
+                  </h4>
+                  <ul className="space-y-2">
+                    {pkg.benefits?.length > 0 ? (
+                      pkg.benefits.map((benefit, bidx) => (
+                        <li
+                          key={bidx}
+                          className="flex items-center gap-2 text-gray-700"
+                        >
+                          <FiCheckCircle className="text-green-600 text-lg flex-shrink-0" />
+                          <span>{benefit}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="text-gray-500">Tidak ada benefit</li>
+                    )}
+                  </ul>
+                </div>
+
+                {/* Tombol Pesan */}
+                <div className="p-6 pt-0">
+                  <a
+                    href={createWhatsAppLink(pkg)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 rounded-xl transition-all shadow-md"
+                  >
+                    <FaWhatsapp className="text-xl" /> Booking Sekarang
+                  </a>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }
