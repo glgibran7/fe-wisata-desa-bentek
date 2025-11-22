@@ -1,58 +1,15 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-// Mengganti react-icons/fa dan react-icons/fi dengan lucide-react untuk kompatibilitas lingkungan
 import { Facebook, Instagram, ExternalLink } from "lucide-react";
+import Api from "../utils/Api.jsx";
 
-// --- Data Dummy Simulasi Postingan Sosial Media ---
-// Menghapus properti 'icon' karena sekarang ikon ditentukan secara dinamis di PostCard
-const dummyPosts = [
-  {
-    id: 1,
-    platform: "Instagram",
-    date: "10 November 2025",
-    caption:
-      "Senja di Tiu Demper tak pernah gagal memukau! Siapa yang sudah berkunjung ke air terjun tersembunyi ini? Share pengalamanmu di komen! #DesaBentek #TiuDemper #AirTerjunLombok",
-    image:
-      "https://placehold.co/400x400/80e0e0/ffffff?text=Instagram+Tiu+Demper", // Placeholder image
-    link: "https://instagram.com/p/dummy1",
-  },
-  {
-    id: 2,
-    platform: "Facebook",
-    date: "8 November 2025",
-    caption:
-      "Pengumuman: Festival Budaya Lokal Desa Bentek akan hadir minggu depan! Mari saksikan tarian tradisional dan kuliner khas kami. Cek jadwal lengkap di bio! 🎭 #FestivalBentek #BudayaLombok",
-    image:
-      "https://placehold.co/800x450/e8a090/ffffff?text=Facebook+Event+Budaya", // Placeholder image
-    link: "https://facebook.com/post/dummy2",
-  },
-  {
-    id: 3,
-    platform: "Instagram",
-    date: "5 November 2025",
-    caption:
-      "Agrowisata Kakao Desa Bentek. Belajar membuat cokelat dari biji sampai siap santap. Cocok untuk liburan edukatif keluarga! 🍫🌱 Booking paket agro kami sekarang! #Agrowisata #KakaoBentek",
-    image:
-      "https://placehold.co/400x500/a0c0e8/ffffff?text=Instagram+Kakao+Farm", // Placeholder image
-    link: "https://instagram.com/p/dummy3",
-  },
-  {
-    id: 4,
-    platform: "Facebook",
-    date: "1 November 2025",
-    caption:
-      "Spot terbaru! Villa Bintang menawarkan pemandangan sunset terbaik di Bentek. Cocok untuk *healing* dan foto-foto estetik. Jangan lupa bawa kamera terbaikmu! 📸 #VillaBintang #SunsetLombok",
-    image:
-      "https://placehold.co/600x600/c0d0a0/ffffff?text=Facebook+Villa+Bintang", // Placeholder image
-    link: "https://facebook.com/post/dummy4",
-  },
-];
-
-// Komponen Card Postingan
+// --------------------------------------------
+// CARD UNTUK BLOG
+// --------------------------------------------
 const PostCard = ({ post, index }) => {
-  const isInstagram = post.platform === "Instagram";
-  // Menentukan ikon Lucide berdasarkan platform
-  const PlatformIcon = isInstagram ? Instagram : Facebook;
+  // Kalau nanti kamu mau kategorikan platform, bisa pakai field lain.
+  // Default: tampilkan icon Instagram saja
+  const PlatformIcon = Instagram;
 
   return (
     <motion.div
@@ -62,72 +19,83 @@ const PostCard = ({ post, index }) => {
       viewport={{ once: true, amount: 0.3 }}
       className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 overflow-hidden flex flex-col group"
     >
-      {/* Gambar Postingan */}
-      <div
-        className={`w-full overflow-hidden ${
-          isInstagram ? "aspect-[4/3] md:aspect-[5/4]" : "aspect-[16/9]"
-        }`}
-      >
+      {/* Gambar */}
+      <div className="w-full aspect-[4/3] overflow-hidden">
         <img
-          src={post.image}
-          alt={`Post from ${post.platform}`}
-          // Menambahkan penanganan error gambar placeholder
+          src={
+            post.image_url ||
+            "https://placehold.co/600x400/94a3b8/ffffff?text=No+Image"
+          }
           onError={(e) => {
-            e.target.onerror = null; // Mencegah loop
+            e.target.onerror = null;
             e.target.src =
               "https://placehold.co/600x400/94a3b8/ffffff?text=Image+Not+Found";
           }}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          alt={post.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
       </div>
 
-      {/* Konten Teks */}
-      <div className="p-6 flex-grow flex flex-col">
-        {/* Header Platform */}
-        <div className="flex items-center justify-between mb-3">
+      {/* Konten */}
+      <div className="p-6 flex flex-col flex-grow">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-3">
           <div className="flex items-center gap-2 text-sm font-semibold">
-            {/* Ikon Lucide yang telah ditentukan */}
-            <PlatformIcon
-              className={`w-4 h-4 ${
-                isInstagram ? "text-pink-600" : "text-blue-600"
-              }`}
-            />
-            <span
-              className={`font-bold ${
-                isInstagram ? "text-pink-600" : "text-blue-600"
-              }`}
-            >
-              {post.platform}
-            </span>
+            <PlatformIcon className="w-4 h-4 text-pink-600" />
+            <span className="text-pink-600 font-bold">Blog Desa</span>
           </div>
-          <span className="text-xs text-gray-500">{post.date}</span>
+
+          <span className="text-xs text-gray-500">
+            {new Date(post.created_at).toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </span>
         </div>
 
-        {/* Caption */}
+        <h3 className="font-bold text-lg text-gray-800 mb-2">{post.title}</h3>
+
         <p className="text-gray-700 leading-relaxed mb-4 line-clamp-4 flex-grow">
-          {post.caption}
+          {post.content}
         </p>
 
-        {/* Tombol Aksi */}
         <a
-          href={post.link}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={`/blog/${post.id_blog}`}
           className="mt-auto inline-flex items-center justify-center gap-2 text-sm font-semibold text-green-700 bg-green-50 hover:bg-green-100 px-4 py-2 rounded-lg transition-all border border-green-200"
         >
-          Lihat Postingan Asli
-          <ExternalLink className="w-4 h-4" /> {/* Ikon ExternalLink Lucide */}
+          Baca Selengkapnya
+          <ExternalLink className="w-4 h-4" />
         </a>
       </div>
     </motion.div>
   );
 };
 
+// --------------------------------------------
+// HALAMAN NEWSFEED
+// --------------------------------------------
 export default function NewsFeed() {
+  const [blogs, setBlogs] = useState([]);
+
+  // FETCH BLOG
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const res = await Api.get("/blog");
+        setBlogs(res.data);
+      } catch (err) {
+        console.error("Gagal mengambil data blog:", err);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
+
   return (
     <section id="blog" className="py-20 bg-[#fcf2e8] px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -138,21 +106,27 @@ export default function NewsFeed() {
             Berita Terbaru Desa Bentek
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Ikuti aktivitas dan pembaruan kami langsung dari media sosial.
+            Informasi terbaru dan kegiatan dari Desa Bentek.
           </p>
         </motion.div>
 
-        {/* Grid Postingan */}
+        {/* Grid Data Dari API */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {dummyPosts.map((post, index) => (
-            <PostCard key={post.id} post={post} index={index} />
-          ))}
+          {blogs.length === 0 ? (
+            <p className="text-center col-span-3 text-gray-600">
+              Belum ada postingan blog.
+            </p>
+          ) : (
+            blogs.map((post, index) => (
+              <PostCard key={post.id_blog} post={post} index={index} />
+            ))
+          )}
         </div>
 
-        {/* Placeholder untuk tombol load lebih banyak / link ke sosial media */}
+        {/* Tombol ke Instagram */}
         <div className="text-center mt-16">
           <motion.a
-            href="https://instagram.com/desabentek" // Ganti dengan link Instagram / Facebook resmi
+            href="https://instagram.com/desabentek"
             target="_blank"
             rel="noopener noreferrer"
             initial={{ opacity: 0 }}
@@ -162,7 +136,7 @@ export default function NewsFeed() {
             whileTap={{ scale: 0.95 }}
             className="inline-flex items-center gap-2 px-8 py-3 bg-[#c97b2f] text-white font-semibold rounded-full shadow-lg hover:bg-[#a86323] transition-all"
           >
-            Lihat Semua Postingan di Instagram
+            Kunjungi Instagram Desa
             <Instagram className="text-xl" />
           </motion.a>
         </div>
