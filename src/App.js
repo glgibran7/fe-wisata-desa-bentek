@@ -5,6 +5,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminDestinasi from "./pages/AdminDestinasi";
 import AdminPaket from "./pages/AdminPaket";
 import AdminBlog from "./pages/AdminBlog";
+import BlogDetail from "./components/BlogDetail";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/blog/:id" element={<BlogDetail />} />
 
           {/* === Rute Dashboard Admin === */}
           <Route path="/admin" element={<AdminDashboard />} />

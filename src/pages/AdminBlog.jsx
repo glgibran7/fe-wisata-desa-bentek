@@ -12,14 +12,13 @@ export default function AdminBlog() {
     title: "",
     content: "",
     image_url: "",
+    post_url: "",
     imageFile: null,
   });
 
   const navigate = useNavigate();
 
-  // ==================================================
   // FETCH BLOG DARI API
-  // ==================================================
   const fetchBlogs = async () => {
     try {
       const res = await Api.get("/blog");
@@ -33,9 +32,7 @@ export default function AdminBlog() {
     fetchBlogs();
   }, []);
 
-  // ==================================================
   // UPLOAD GAMBAR → API HARUS SEDIA /upload
-  // ==================================================
   const uploadImage = async (file) => {
     const form = new FormData();
     form.append("image", file);
@@ -52,9 +49,7 @@ export default function AdminBlog() {
     }
   };
 
-  // ==================================================
   // SUBMIT TAMBAH / EDIT
-  // ==================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -70,6 +65,7 @@ export default function AdminBlog() {
       title: formData.title,
       content: formData.content,
       image_url,
+      post_url: formData.post_url,
     };
 
     try {
@@ -89,9 +85,7 @@ export default function AdminBlog() {
     }
   };
 
-  // ==================================================
   // DELETE BLOG
-  // ==================================================
   const handleDelete = async (id) => {
     if (!window.confirm("Yakin ingin menghapus blog ini?")) return;
 
@@ -103,32 +97,27 @@ export default function AdminBlog() {
     }
   };
 
-  // ==================================================
   // OPEN EDIT
-  // ==================================================
   const handleEdit = (blog) => {
     setEditId(blog.id_blog);
     setFormData({
       title: blog.title,
       content: blog.content,
       image_url: blog.image_url,
+      post_url: blog.post_url,
       imageFile: null,
     });
     setFormOpen(true);
   };
 
-  // ==================================================
   // CLOSE FORM
-  // ==================================================
   const closeForm = () => {
     setFormOpen(false);
     setEditId(null);
     setFormData({ title: "", content: "", image_url: "", imageFile: null });
   };
 
-  // ==================================================
   // HANDLE IMAGE INPUT
-  // ==================================================
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -245,6 +234,20 @@ export default function AdminBlog() {
                     setFormData({ ...formData, content: e.target.value })
                   }
                   required
+                />
+              </div>
+              <div>
+                <label className="block mb-1 text-[#1c4444] font-medium">
+                  Url Postingan
+                </label>
+                <input
+                  type="text"
+                  className="w-full p-3 border rounded-lg"
+                  value={formData.post_url}
+                  onChange={(e) =>
+                    setFormData({ ...formData, post_url: e.target.value })
+                  }
+                  placeholder="Masukkan URL asli postingan (opsional)"
                 />
               </div>
 

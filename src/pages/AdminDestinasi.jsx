@@ -14,7 +14,7 @@ export default function AdminDestinasi() {
     nama: "",
     deskripsi: "",
     gambar: "",
-    lokasi: "", // ⬅️ TAMBAHAN
+    lokasi: "",
   });
 
   const navigate = useNavigate();
@@ -60,7 +60,7 @@ export default function AdminDestinasi() {
           name: formData.nama,
           description: formData.deskripsi,
           image_url: formData.gambar,
-          location_url: formData.lokasi, // ⬅️ TAMBAH
+          location_url: formData.lokasi,
         });
 
         const updated = [...destinasi];
@@ -78,7 +78,7 @@ export default function AdminDestinasi() {
           name: formData.nama,
           description: formData.deskripsi,
           image_url: formData.gambar,
-          location_url: formData.lokasi, // ⬅️ TAMBAH
+          location_url: formData.lokasi,
         });
 
         setDestinasi([...destinasi, res.data]);
@@ -111,7 +111,7 @@ export default function AdminDestinasi() {
       nama: item.name,
       deskripsi: item.description,
       gambar: item.image_url,
-      lokasi: item.location_url ?? "", // ⬅️ AMAN
+      lokasi: item.location_url ?? "",
     });
 
     setFormOpen(true);

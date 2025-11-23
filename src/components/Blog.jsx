@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Facebook, Instagram, ExternalLink } from "lucide-react";
+import { Instagram, ExternalLink } from "lucide-react";
+import { AiOutlineClose } from "react-icons/ai";
 import Api from "../utils/Api.jsx";
+import { useNavigate } from "react-router-dom";
 
-// --------------------------------------------
-// CARD UNTUK BLOG
-// --------------------------------------------
+// ---------------------------------------------------
+// CARD BLOG
+// ---------------------------------------------------
 const PostCard = ({ post, index }) => {
-  // Kalau nanti kamu mau kategorikan platform, bisa pakai field lain.
-  // Default: tampilkan icon Instagram saja
-  const PlatformIcon = Instagram;
-
+  const navigate = useNavigate();
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -40,9 +39,8 @@ const PostCard = ({ post, index }) => {
       <div className="p-6 flex flex-col flex-grow">
         {/* Header */}
         <div className="flex justify-between items-center mb-3">
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <PlatformIcon className="w-4 h-4 text-pink-600" />
-            <span className="text-pink-600 font-bold">Blog Desa</span>
+          <div className="text-sm font-semibold text-pink-600 capitalize">
+            Postingan
           </div>
 
           <span className="text-xs text-gray-500">
@@ -54,31 +52,45 @@ const PostCard = ({ post, index }) => {
           </span>
         </div>
 
-        <h3 className="font-bold text-lg text-gray-800 mb-2">{post.title}</h3>
-
+        <h3 className="font-bold text-lg text-gray-800 mb-2 capitalize">
+          {post.title}
+        </h3>
         <p className="text-gray-700 leading-relaxed mb-4 line-clamp-4 flex-grow">
           {post.content}
         </p>
 
-        <a
-          href={`/blog/${post.id_blog}`}
-          className="mt-auto inline-flex items-center justify-center gap-2 text-sm font-semibold text-green-700 bg-green-50 hover:bg-green-100 px-4 py-2 rounded-lg transition-all border border-green-200"
-        >
-          Baca Selengkapnya
-          <ExternalLink className="w-4 h-4" />
-        </a>
+        {/* Tombol Dinamis */}
+        {post.post_url ? (
+          <a
+            href={post.post_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-auto inline-flex items-center justify-center gap-2 text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-all border border-blue-200"
+          >
+            Lihat Postingan Asli
+            <ExternalLink className="w-4 h-4" />
+          </a>
+        ) : (
+          <button
+            onClick={() => navigate(`/blog/${post.id_blog}`)}
+            className="mt-auto inline-flex items-center justify-center gap-2 text-sm font-semibold text-green-700 bg-green-50 hover:bg-green-100 px-4 py-2 rounded-lg transition-all border border-green-200"
+          >
+            Baca Selengkapnya
+            <ExternalLink className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </motion.div>
   );
 };
 
-// --------------------------------------------
+// ---------------------------------------------------
 // HALAMAN NEWSFEED
-// --------------------------------------------
+// ---------------------------------------------------
 export default function NewsFeed() {
   const [blogs, setBlogs] = useState([]);
 
-  // FETCH BLOG
+  // Fetch data blog
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
@@ -110,7 +122,7 @@ export default function NewsFeed() {
           </p>
         </motion.div>
 
-        {/* Grid Data Dari API */}
+        {/* Grid Blog */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {blogs.length === 0 ? (
             <p className="text-center col-span-3 text-gray-600">
@@ -123,7 +135,7 @@ export default function NewsFeed() {
           )}
         </div>
 
-        {/* Tombol ke Instagram */}
+        {/* Tombol Instagram */}
         <div className="text-center mt-16">
           <motion.a
             href="https://instagram.com/desabentek"
