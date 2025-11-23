@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash, FaArrowLeft, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Api from "../utils/Api.jsx";
-import Loading from "../components/Loading.jsx"; // ⬅️ Tambahkan ini
+import Loading from "../components/Loading.jsx";
 
 export default function AdminDestinasi() {
   const [destinasi, setDestinasi] = useState([]);
-  const [loading, setLoading] = useState(false); // ⬅️ LOADING STATE
+  const [loading, setLoading] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [formData, setFormData] = useState({
@@ -14,28 +14,29 @@ export default function AdminDestinasi() {
     nama: "",
     deskripsi: "",
     gambar: "",
+    lokasi: "", // ⬅️ TAMBAHAN
   });
 
   const navigate = useNavigate();
 
-  //  GET DATA DESTINASI
+  // GET
   useEffect(() => {
     const fetchDestinasi = async () => {
       try {
-        setLoading(true); // START LOADING
+        setLoading(true);
         const res = await Api.get("/destinasi");
         setDestinasi(res.data);
       } catch (error) {
         console.error("Gagal mengambil destinasi:", error);
       } finally {
-        setLoading(false); // STOP LOADING
+        setLoading(false);
       }
     };
 
     fetchDestinasi();
   }, []);
 
-  //  HANDLE UPLOAD IMAGE
+  // Upload Gambar
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -47,19 +48,19 @@ export default function AdminDestinasi() {
     reader.readAsDataURL(file);
   };
 
-  //  SUBMIT
-
+  // SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // START LOADING
+    setLoading(true);
 
     try {
       if (editIndex !== null) {
-        // UPDATE DATA
+        // UPDATE
         await Api.put(`/destinasi/${formData.id}`, {
           name: formData.nama,
           description: formData.deskripsi,
           image_url: formData.gambar,
+          location_url: formData.lokasi, // ⬅️ TAMBAH
         });
 
         const updated = [...destinasi];
@@ -68,30 +69,39 @@ export default function AdminDestinasi() {
           name: formData.nama,
           description: formData.deskripsi,
           image_url: formData.gambar,
+          location_url: formData.lokasi,
         };
         setDestinasi(updated);
       } else {
-        // CREATE DATA
+        // CREATE
         const res = await Api.post("/destinasi", {
           name: formData.nama,
           description: formData.deskripsi,
           image_url: formData.gambar,
+          location_url: formData.lokasi, // ⬅️ TAMBAH
         });
 
         setDestinasi([...destinasi, res.data]);
       }
 
-      setFormData({ id: null, nama: "", deskripsi: "", gambar: "" });
+      // Reset
+      setFormData({
+        id: null,
+        nama: "",
+        deskripsi: "",
+        gambar: "",
+        lokasi: "",
+      });
       setEditIndex(null);
       setFormOpen(false);
     } catch (err) {
       console.error("Gagal menyimpan destinasi:", err);
     } finally {
-      setLoading(false); // STOP LOADING
+      setLoading(false);
     }
   };
 
-  //  EDIT
+  // EDIT
   const handleEdit = (index) => {
     const item = destinasi[index];
 
@@ -101,26 +111,26 @@ export default function AdminDestinasi() {
       nama: item.name,
       deskripsi: item.description,
       gambar: item.image_url,
+      lokasi: item.location_url ?? "", // ⬅️ AMAN
     });
 
     setFormOpen(true);
   };
 
-  //  DELETE
+  // DELETE
   const handleDelete = async (index) => {
     const item = destinasi[index];
 
     if (!window.confirm("Yakin ingin menghapus destinasi ini?")) return;
 
     try {
-      setLoading(true); // START LOADING
+      setLoading(true);
       await Api.delete(`/destinasi/${item.id_destination}`);
-
       setDestinasi(destinasi.filter((_, i) => i !== index));
     } catch (err) {
       console.error("Gagal menghapus destinasi:", err);
     } finally {
-      setLoading(false); // STOP LOADING
+      setLoading(false);
     }
   };
 
@@ -152,7 +162,7 @@ export default function AdminDestinasi() {
       {/* LOADING */}
       {loading && <Loading />}
 
-      {/* LIST DESTINASI */}
+      {/* LIST */}
       {!loading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {destinasi.map((item, index) => (
@@ -170,7 +180,19 @@ export default function AdminDestinasi() {
                 <h3 className="text-lg font-semibold text-[#1c4444]">
                   {item.name}
                 </h3>
+
                 <p className="text-gray-600 text-sm mt-2">{item.description}</p>
+
+                {item.location_url && (
+                  <a
+                    href={item.location_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline block mt-2"
+                  >
+                    Lihat Lokasi
+                  </a>
+                )}
 
                 <div className="flex justify-end gap-3 mt-4">
                   <button
@@ -193,7 +215,7 @@ export default function AdminDestinasi() {
         </div>
       )}
 
-      {/* MODAL FORM */}
+      {/* MODAL */}
       {formOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg relative">
@@ -234,6 +256,22 @@ export default function AdminDestinasi() {
                 ></textarea>
               </div>
 
+              {/* Lokasi */}
+              <div>
+                <label className="block mb-1 text-[#1c4444] font-medium">
+                  URL Lokasi (Google Maps)
+                </label>
+                <input
+                  type="text"
+                  placeholder="https://maps.google.com/..."
+                  className="w-full p-3 border rounded-lg"
+                  value={formData.lokasi}
+                  onChange={(e) =>
+                    setFormData({ ...formData, lokasi: e.target.value })
+                  }
+                />
+              </div>
+
               {/* Upload Foto */}
               <div>
                 <label className="block mb-1 text-[#1c4444] font-medium">
@@ -247,7 +285,6 @@ export default function AdminDestinasi() {
                 />
               </div>
 
-              {/* Preview */}
               {formData.gambar && (
                 <img
                   src={formData.gambar}
@@ -256,7 +293,6 @@ export default function AdminDestinasi() {
                 />
               )}
 
-              {/* Tombol */}
               <div className="flex gap-3 justify-end">
                 <button
                   type="submit"
@@ -275,6 +311,7 @@ export default function AdminDestinasi() {
                       nama: "",
                       deskripsi: "",
                       gambar: "",
+                      lokasi: "",
                     });
                   }}
                   className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
@@ -284,13 +321,18 @@ export default function AdminDestinasi() {
               </div>
             </form>
 
-            {/* Close Button */}
             <button
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl font-bold"
               onClick={() => {
                 setFormOpen(false);
                 setEditIndex(null);
-                setFormData({ id: null, nama: "", deskripsi: "", gambar: "" });
+                setFormData({
+                  id: null,
+                  nama: "",
+                  deskripsi: "",
+                  gambar: "",
+                  lokasi: "",
+                });
               }}
             >
               <FaTimes size={20} />

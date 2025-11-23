@@ -21,7 +21,7 @@ export default function Explore() {
   }, []);
 
   const handleOpenMap = (link) => {
-    if (!link) return; // blok kalau maps_url belum ada
+    if (!link) return; // blok kalau location_url belum ada
     setSelectedLink(link);
     setShowModal(true);
   };
@@ -57,7 +57,7 @@ export default function Explore() {
       {/* CARD GRID */}
       <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
         {destinations.map((item, index) => {
-          const hasMap = !!item.maps_url; // true kalau maps_url ada
+          const hasMap = !!item.location_url; // true kalau location_url ada
 
           return (
             <motion.div
@@ -65,7 +65,7 @@ export default function Explore() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.2 }}
-              onClick={() => hasMap && handleOpenMap(item.maps_url)}
+              onClick={() => hasMap && handleOpenMap(item.location_url)}
               className={`p-6 bg-white rounded-2xl shadow border border-gray-100 transition 
                 ${
                   hasMap
