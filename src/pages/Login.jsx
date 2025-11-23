@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FiLock, FiMail } from "react-icons/fi";
+import { FiLock, FiMail, FiEye, FiEyeOff } from "react-icons/fi";
 import logo from "../assets/images/logo_wisata_desa_bentek.png"; // pastikan path benar
 import Api from "../utils/Api";
 
@@ -10,6 +10,8 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false); // state untuk spinner
+  const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -92,6 +94,7 @@ export default function AdminLogin() {
           </div>
 
           {/* Password */}
+          {/* Password */}
           <div className="mb-6">
             <label
               htmlFor="password"
@@ -99,19 +102,32 @@ export default function AdminLogin() {
             >
               Password
             </label>
+
             <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition"
+                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition"
                 placeholder="Masukkan password"
               />
+
+              {/* Icon Lock */}
               <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+
+              {/* Toggle Lihat Password */}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                disabled={loading}
+              >
+                {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+              </button>
             </div>
           </div>
 
