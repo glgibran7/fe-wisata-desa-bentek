@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Api from "../utils/Api.jsx";
+import Loading from "../components/Loading";
 
 export default function AdminPaket() {
   const [paket, setPaket] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [destinationsList, setDestinationsList] = useState([]);
+  const [loading, setLoading] = useState(false); // ⬅️ LOADING STATE FULL PAGE
 
   const [formData, setFormData] = useState({
     id: null,
@@ -62,6 +64,7 @@ export default function AdminPaket() {
   // SUBMIT TAMBAH / EDIT
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // ⬅️ FULL PAGE LOADING ON
 
     const payload = {
       name: formData.nama,
@@ -74,14 +77,12 @@ export default function AdminPaket() {
 
     try {
       if (editIndex !== null) {
-        // UPDATE
         await Api.put(`/paket/${formData.id}`, payload);
 
         const updated = [...paket];
         updated[editIndex] = { ...updated[editIndex], ...payload };
         setPaket(updated);
       } else {
-        // CREATE
         const res = await Api.post("/paket", payload);
         setPaket([...paket, res.data]);
       }
@@ -89,6 +90,8 @@ export default function AdminPaket() {
       resetForm();
     } catch (err) {
       console.error("Gagal menyimpan paket:", err);
+    } finally {
+      setLoading(false); // ⬅️ OFF
     }
   };
 
@@ -134,16 +137,27 @@ export default function AdminPaket() {
 
     if (!window.confirm("Yakin ingin menghapus paket ini?")) return;
 
+    setLoading(true); // ⬅️ SHOW LOADING SAAT DELETE
+
     try {
       await Api.delete(`/paket/${item.id_package}`);
       setPaket(paket.filter((_, i) => i !== index));
     } catch (err) {
       console.error("Gagal menghapus paket:", err);
+    } finally {
+      setLoading(false); // ⬅️ HIDE
     }
   };
 
   return (
     <div className="min-h-screen bg-[#fcf2e8] p-6">
+      {/* FULL PAGE LOADING OVERLAY */}
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-[9999]">
+          <Loading size="60px" color="#ffffff" text="Menyimpan data..." />
+        </div>
+      )}
+
       {/* Header */}
       <header className="flex justify-between items-center mb-10">
         <div className="flex items-center gap-4">
@@ -204,6 +218,7 @@ export default function AdminPaket() {
                   })
                   .join(", ")}
               </p>
+
               {/* Benefits */}
               <div className="mt-2">
                 <p className="text-sm font-semibold text-[#1c4444]">
@@ -317,7 +332,6 @@ export default function AdminPaket() {
                         )}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            // Tambah ID
                             setFormData({
                               ...formData,
                               destinations: [
@@ -326,7 +340,6 @@ export default function AdminPaket() {
                               ],
                             });
                           } else {
-                            // Hapus ID
                             setFormData({
                               ...formData,
                               destinations: formData.destinations.filter(
