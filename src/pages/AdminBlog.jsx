@@ -2,11 +2,15 @@ import { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrash, FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Api from "../utils/Api.jsx";
+import Loading from "../components/Loading";
 
 export default function AdminBlog() {
   const [blogs, setBlogs] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [loading, setLoading] = useState(true); // LOADING UTAMA
+  const [saving, setSaving] = useState(false); // LOADING SAAT SIMPAN
+  const [deleting, setDeleting] = useState(false); // LOADING SAAT HAPUS
 
   const [formData, setFormData] = useState({
     title: "",
@@ -18,13 +22,16 @@ export default function AdminBlog() {
 
   const navigate = useNavigate();
 
-  // FETCH BLOG DARI API
+  // FETCH BLOG
   const fetchBlogs = async () => {
+    setLoading(true);
     try {
       const res = await Api.get("/blog");
       setBlogs(res.data);
     } catch (err) {
       console.error("Gagal mengambil blog:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -32,7 +39,7 @@ export default function AdminBlog() {
     fetchBlogs();
   }, []);
 
-  // UPLOAD GAMBAR → API HARUS SEDIA /upload
+  // UPLOAD GAMBAR
   const uploadImage = async (file) => {
     const form = new FormData();
     form.append("image", file);
@@ -41,7 +48,7 @@ export default function AdminBlog() {
       const res = await Api.post("/upload", form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      return res.data.url; // BE harus return { url: "..." }
+      return res.data.url;
     } catch (err) {
       console.error("Upload gagal:", err);
       alert("Gagal upload gambar");
@@ -49,13 +56,13 @@ export default function AdminBlog() {
     }
   };
 
-  // SUBMIT TAMBAH / EDIT
+  // SUBMIT FORM
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaving(true);
 
     let image_url = formData.image_url;
 
-    // Jika ada file baru → upload
     if (formData.imageFile) {
       const uploaded = await uploadImage(formData.imageFile);
       if (uploaded) image_url = uploaded;
@@ -70,10 +77,8 @@ export default function AdminBlog() {
 
     try {
       if (editId) {
-        // EDIT
         await Api.put(`/blog/${editId}`, payload);
       } else {
-        // TAMBAH
         await Api.post("/blog", payload);
       }
 
@@ -82,6 +87,8 @@ export default function AdminBlog() {
     } catch (err) {
       console.error("Gagal menyimpan:", err);
       alert("Gagal menyimpan data");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -89,11 +96,14 @@ export default function AdminBlog() {
   const handleDelete = async (id) => {
     if (!window.confirm("Yakin ingin menghapus blog ini?")) return;
 
+    setDeleting(true);
     try {
       await Api.delete(`/blog/${id}`);
       setBlogs(blogs.filter((b) => b.id_blog !== id));
     } catch (err) {
       console.error("Gagal hapus:", err);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -114,10 +124,16 @@ export default function AdminBlog() {
   const closeForm = () => {
     setFormOpen(false);
     setEditId(null);
-    setFormData({ title: "", content: "", image_url: "", imageFile: null });
+    setFormData({
+      title: "",
+      content: "",
+      post_url: "",
+      image_url: "",
+      imageFile: null,
+    });
   };
 
-  // HANDLE IMAGE INPUT
+  // HANDLE IMAGE UPLOAD
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -131,6 +147,17 @@ export default function AdminBlog() {
 
   return (
     <div className="min-h-screen bg-[#fcf2e8] p-6">
+      {/* LOADING OVERLAY */}
+      {loading && (
+        <Loading overlay size={60} color="#ffffff" text="Loading..." />
+      )}
+      {saving && (
+        <Loading overlay size={60} color="#ffffff" text="Loading..." />
+      )}
+      {deleting && (
+        <Loading overlay size={60} color="#ffffff" text="Loading..." />
+      )}
+
       {/* Header */}
       <header className="flex justify-between items-center mb-10">
         <div className="flex items-center gap-4">
@@ -201,11 +228,11 @@ export default function AdminBlog() {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
           <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg max-h-[90vh] overflow-y-auto relative">
             <h2 className="text-xl font-semibold text-[#1c4444] mb-4">
-              {editId ? "Edit Blog" : "Tambah Blog Baru"}
+              {editId ? "Edit Blog" : "Tambah Blog"}
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Title */}
+              {/* Judul */}
               <div>
                 <label className="block mb-1 text-[#1c4444] font-medium">
                   Judul
@@ -221,7 +248,7 @@ export default function AdminBlog() {
                 />
               </div>
 
-              {/* Content */}
+              {/* Isi Blog */}
               <div>
                 <label className="block mb-1 text-[#1c4444] font-medium">
                   Isi Blog
@@ -236,9 +263,11 @@ export default function AdminBlog() {
                   required
                 />
               </div>
+
+              {/* Url Postingan */}
               <div>
                 <label className="block mb-1 text-[#1c4444] font-medium">
-                  Url Postingan
+                  URL Postingan (opsional)
                 </label>
                 <input
                   type="text"
@@ -247,11 +276,11 @@ export default function AdminBlog() {
                   onChange={(e) =>
                     setFormData({ ...formData, post_url: e.target.value })
                   }
-                  placeholder="Masukkan URL asli postingan (opsional)"
+                  placeholder="https://..."
                 />
               </div>
 
-              {/* Upload Photo */}
+              {/* Upload Foto */}
               <div>
                 <label className="block mb-1 text-[#1c4444] font-medium">
                   Upload Foto
@@ -268,7 +297,7 @@ export default function AdminBlog() {
                 <img
                   src={formData.image_url}
                   alt="Preview"
-                  className="w-40 h-28 object-cover rounded-lg border mt-2"
+                  className="w-40 h-28 object-cover rounded-lg border"
                 />
               )}
 

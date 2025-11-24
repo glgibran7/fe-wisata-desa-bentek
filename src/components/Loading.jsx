@@ -1,51 +1,66 @@
 import React from "react";
 
-const Loading = ({ size = "40px", color = "#3b82f6", text = "Loading..." }) => {
-  return (
-    <div style={styles.container}>
+function hexToRgba(hex, alpha = 1) {
+  if (!hex) return `rgba(59,130,246,${alpha})`;
+  const h = hex.replace("#", "");
+  if (h.length === 3) {
+    const r = parseInt(h[0] + h[0], 16);
+    const g = parseInt(h[1] + h[1], 16);
+    const b = parseInt(h[2] + h[2], 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+  if (h.length === 6) {
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+  return hex;
+}
+
+const Loading = ({
+  size = 40,
+  color = "#3b82f6",
+  text = "Loading...",
+  overlay = false,
+  className = "",
+}) => {
+  const sizeValue = typeof size === "number" ? `${size}px` : size;
+
+  const spinnerStyle = {
+    width: sizeValue,
+    height: sizeValue,
+    borderWidth: `${Math.max(
+      3,
+      Math.round(parseInt(String(sizeValue)) / 10)
+    )}px`,
+    borderStyle: "solid",
+    borderRadius: "50%",
+    borderColor: hexToRgba(color, 0.18),
+    borderTopColor: color,
+  };
+
+  if (overlay) {
+    return (
       <div
-        style={{
-          ...styles.spinner,
-          width: size,
-          height: size,
-          borderColor: `${color}33`,
-          borderTopColor: color,
-        }}
-      />
-      {text && <p style={styles.text}>{text}</p>}
+        className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center ${className}`}
+      >
+        <div className="absolute inset-0 bg-black/40" />
+
+        <div className="relative flex flex-col items-center gap-2 p-4 rounded">
+          <div className="animate-spin" style={spinnerStyle} />
+          {text && <p className="text-sm opacity-80 text-white">{text}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`flex flex-col items-center gap-2 p-2 ${className}`}>
+      <div className="animate-spin" style={spinnerStyle} />
+      {text && <p className="text-sm opacity-80">{text}</p>}
     </div>
   );
 };
-
-const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "8px",
-    padding: "16px",
-  },
-  spinner: {
-    borderWidth: "4px",
-    borderStyle: "solid",
-    borderRadius: "50%",
-    animation: "spin 0.8s linear infinite",
-  },
-  text: {
-    fontSize: "14px",
-    opacity: 0.7,
-  },
-};
-
-// Animasi CSS global
-const styleSheet = document.styleSheets[0];
-styleSheet.insertRule(
-  `
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}`,
-  styleSheet.cssRules.length
-);
 
 export default Loading;

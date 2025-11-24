@@ -9,6 +9,7 @@ export default function AdminDestinasi() {
   const [loading, setLoading] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
+
   const [formData, setFormData] = useState({
     id: null,
     nama: "",
@@ -19,7 +20,7 @@ export default function AdminDestinasi() {
 
   const navigate = useNavigate();
 
-  // GET
+  // GET DESTINASI
   useEffect(() => {
     const fetchDestinasi = async () => {
       try {
@@ -32,7 +33,6 @@ export default function AdminDestinasi() {
         setLoading(false);
       }
     };
-
     fetchDestinasi();
   }, []);
 
@@ -40,22 +40,19 @@ export default function AdminDestinasi() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
-    reader.onloadend = () => {
+    reader.onloadend = () =>
       setFormData({ ...formData, gambar: reader.result });
-    };
     reader.readAsDataURL(file);
   };
 
-  // SUBMIT
+  // SUBMIT FORM
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       if (editIndex !== null) {
-        // UPDATE
         await Api.put(`/destinasi/${formData.id}`, {
           name: formData.nama,
           description: formData.deskripsi,
@@ -73,7 +70,6 @@ export default function AdminDestinasi() {
         };
         setDestinasi(updated);
       } else {
-        // CREATE
         const res = await Api.post("/destinasi", {
           name: formData.nama,
           description: formData.deskripsi,
@@ -84,16 +80,7 @@ export default function AdminDestinasi() {
         setDestinasi([...destinasi, res.data]);
       }
 
-      // Reset
-      setFormData({
-        id: null,
-        nama: "",
-        deskripsi: "",
-        gambar: "",
-        lokasi: "",
-      });
-      setEditIndex(null);
-      setFormOpen(false);
+      resetForm();
     } catch (err) {
       console.error("Gagal menyimpan destinasi:", err);
     } finally {
@@ -101,10 +88,22 @@ export default function AdminDestinasi() {
     }
   };
 
+  // RESET FORM
+  const resetForm = () => {
+    setFormData({
+      id: null,
+      nama: "",
+      deskripsi: "",
+      gambar: "",
+      lokasi: "",
+    });
+    setEditIndex(null);
+    setFormOpen(false);
+  };
+
   // EDIT
   const handleEdit = (index) => {
     const item = destinasi[index];
-
     setEditIndex(index);
     setFormData({
       id: item.id_destination,
@@ -113,7 +112,6 @@ export default function AdminDestinasi() {
       gambar: item.image_url,
       lokasi: item.location_url ?? "",
     });
-
     setFormOpen(true);
   };
 
@@ -123,8 +121,8 @@ export default function AdminDestinasi() {
 
     if (!window.confirm("Yakin ingin menghapus destinasi ini?")) return;
 
+    setLoading(true);
     try {
-      setLoading(true);
       await Api.delete(`/destinasi/${item.id_destination}`);
       setDestinasi(destinasi.filter((_, i) => i !== index));
     } catch (err) {
@@ -136,6 +134,11 @@ export default function AdminDestinasi() {
 
   return (
     <div className="min-h-screen bg-[#fcf2e8] p-6">
+      {/* LOADING OVERLAY */}
+      {loading && (
+        <Loading overlay size={60} color="#ffffff" text="Loading..." />
+      )}
+
       {/* Header */}
       <header className="flex justify-between items-center mb-10">
         <div className="flex items-center gap-4">
@@ -159,63 +162,57 @@ export default function AdminDestinasi() {
         </button>
       </header>
 
-      {/* LOADING */}
-      {loading && <Loading />}
+      {/* LIST DESTINASI */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {destinasi.map((item, index) => (
+          <div
+            key={item.id_destination}
+            className="bg-white rounded-xl shadow-md overflow-hidden border-l-4 border-[#1c4444]"
+          >
+            <img
+              src={item.image_url}
+              alt={item.name}
+              className="w-full h-40 object-cover"
+            />
 
-      {/* LIST */}
-      {!loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {destinasi.map((item, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-xl shadow-md overflow-hidden border-l-4 border-[#1c4444]"
-            >
-              <img
-                src={item.image_url}
-                alt={item.name}
-                className="w-full h-40 object-cover"
-              />
+            <div className="p-4">
+              <h3 className="text-lg font-semibold text-[#1c4444]">
+                {item.name}
+              </h3>
 
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-[#1c4444]">
-                  {item.name}
-                </h3>
+              <p className="text-gray-600 text-sm mt-2">{item.description}</p>
 
-                <p className="text-gray-600 text-sm mt-2">{item.description}</p>
+              {item.location_url && (
+                <a
+                  href={item.location_url}
+                  target="_blank"
+                  className="text-blue-600 underline block mt-2"
+                >
+                  Lihat Lokasi
+                </a>
+              )}
 
-                {item.location_url && (
-                  <a
-                    href={item.location_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline block mt-2"
-                  >
-                    Lihat Lokasi
-                  </a>
-                )}
+              <div className="flex justify-end gap-3 mt-4">
+                <button
+                  onClick={() => handleEdit(index)}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  <FaEdit size={18} />
+                </button>
 
-                <div className="flex justify-end gap-3 mt-4">
-                  <button
-                    onClick={() => handleEdit(index)}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    <FaEdit size={18} />
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(index)}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    <FaTrash size={18} />
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleDelete(index)}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  <FaTrash size={18} />
+                </button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
 
-      {/* MODAL */}
+      {/* MODAL FORM */}
       {formOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-lg relative">
@@ -288,33 +285,23 @@ export default function AdminDestinasi() {
               {formData.gambar && (
                 <img
                   src={formData.gambar}
-                  className="w-40 h-28 object-cover rounded-lg border mt-2"
                   alt="preview"
+                  className="w-40 h-28 object-cover rounded-lg border"
                 />
               )}
 
-              <div className="flex gap-3 justify-end">
+              <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="submit"
-                  className="bg-[#1c4444] text-white px-4 py-2 rounded-lg hover:bg-[#163737] transition"
+                  className="bg-[#1c4444] text-white px-4 py-2 rounded-lg hover:bg-[#163737]"
                 >
                   Simpan
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setFormOpen(false);
-                    setEditIndex(null);
-                    setFormData({
-                      id: null,
-                      nama: "",
-                      deskripsi: "",
-                      gambar: "",
-                      lokasi: "",
-                    });
-                  }}
-                  className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
+                  onClick={resetForm}
+                  className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500"
                 >
                   Batal
                 </button>
@@ -322,18 +309,8 @@ export default function AdminDestinasi() {
             </form>
 
             <button
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl font-bold"
-              onClick={() => {
-                setFormOpen(false);
-                setEditIndex(null);
-                setFormData({
-                  id: null,
-                  nama: "",
-                  deskripsi: "",
-                  gambar: "",
-                  lokasi: "",
-                });
-              }}
+              onClick={resetForm}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl"
             >
               <FaTimes size={20} />
             </button>

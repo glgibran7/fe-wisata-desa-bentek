@@ -9,7 +9,7 @@ export default function AdminPaket() {
   const [formOpen, setFormOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [destinationsList, setDestinationsList] = useState([]);
-  const [loading, setLoading] = useState(false); // ⬅️ LOADING STATE FULL PAGE
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     id: null,
@@ -23,17 +23,18 @@ export default function AdminPaket() {
 
   const navigate = useNavigate();
 
-  // GET DATA /paket
   useEffect(() => {
     const fetchPaket = async () => {
+      setLoading(true);
       try {
         const res = await Api.get("/paket");
         setPaket(res.data);
       } catch (err) {
         console.error("Gagal mengambil paket:", err);
+      } finally {
+        setLoading(false);
       }
     };
-
     fetchPaket();
   }, []);
 
@@ -46,25 +47,21 @@ export default function AdminPaket() {
         console.error("Gagal mengambil destinasi:", err);
       }
     };
-
     fetchDestinasi();
   }, []);
 
-  // UPLOAD IMAGE BASE64
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onloadend = () =>
       setFormData({ ...formData, gambar: reader.result });
     reader.readAsDataURL(file);
   };
 
-  // SUBMIT TAMBAH / EDIT
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // ⬅️ FULL PAGE LOADING ON
+    setLoading(true);
 
     const payload = {
       name: formData.nama,
@@ -78,7 +75,6 @@ export default function AdminPaket() {
     try {
       if (editIndex !== null) {
         await Api.put(`/paket/${formData.id}`, payload);
-
         const updated = [...paket];
         updated[editIndex] = { ...updated[editIndex], ...payload };
         setPaket(updated);
@@ -91,7 +87,7 @@ export default function AdminPaket() {
     } catch (err) {
       console.error("Gagal menyimpan paket:", err);
     } finally {
-      setLoading(false); // ⬅️ OFF
+      setLoading(false);
     }
   };
 
@@ -109,12 +105,8 @@ export default function AdminPaket() {
     setFormOpen(false);
   };
 
-  // =======================
-  // EDIT PAKET
-  // =======================
   const handleEdit = (index) => {
     const item = paket[index];
-
     setEditIndex(index);
     setFormData({
       id: item.id_package,
@@ -125,49 +117,38 @@ export default function AdminPaket() {
       benefits: item.benefits,
       gambar: item.image_url,
     });
-
     setFormOpen(true);
   };
 
-  // =======================
-  // DELETE /paket/:id
-  // =======================
   const handleDelete = async (index) => {
     const item = paket[index];
-
     if (!window.confirm("Yakin ingin menghapus paket ini?")) return;
 
-    setLoading(true); // ⬅️ SHOW LOADING SAAT DELETE
-
+    setLoading(true);
     try {
       await Api.delete(`/paket/${item.id_package}`);
       setPaket(paket.filter((_, i) => i !== index));
     } catch (err) {
       console.error("Gagal menghapus paket:", err);
     } finally {
-      setLoading(false); // ⬅️ HIDE
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-[#fcf2e8] p-6">
-      {/* FULL PAGE LOADING OVERLAY */}
       {loading && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-[9999]">
-          <Loading size="60px" color="#ffffff" text="Menyimpan data..." />
-        </div>
+        <Loading overlay size={60} color="#ffffff" text="Loading..." />
       )}
 
-      {/* Header */}
       <header className="flex justify-between items-center mb-10">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-[#1c4444] hover:text-[#163737] px-3 py-1 rounded-md"
+            className="flex items-center gap-2 text-[#1c4444] hover:text-[#163737]"
           >
             <FaArrowLeft size={20} />
           </button>
-
           <h1 className="text-3xl font-bold text-[#1c4444]">
             Manajemen Paket Wisata
           </h1>
@@ -175,13 +156,12 @@ export default function AdminPaket() {
 
         <button
           onClick={() => setFormOpen(true)}
-          className="flex items-center gap-2 bg-[#c97b2f] text-white px-4 py-2 rounded-lg hover:bg-[#a86323] transition"
+          className="flex items-center gap-2 bg-[#c97b2f] text-white px-4 py-2 rounded-lg hover:bg-[#a86323]"
         >
           <FaPlus /> Tambah Paket
         </button>
       </header>
 
-      {/* LIST PAKET */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {paket.map((item, index) => (
           <div
@@ -219,13 +199,12 @@ export default function AdminPaket() {
                   .join(", ")}
               </p>
 
-              {/* Benefits */}
               <div className="mt-2">
                 <p className="text-sm font-semibold text-[#1c4444]">
                   Benefits:
                 </p>
                 <ul className="list-disc list-inside text-sm text-gray-700">
-                  {item.benefits && item.benefits.length > 0 ? (
+                  {item.benefits?.length ? (
                     item.benefits.map((b, i) => <li key={i}>{b}</li>)
                   ) : (
                     <li>-</li>
@@ -253,7 +232,6 @@ export default function AdminPaket() {
         ))}
       </div>
 
-      {/* MODAL FORM */}
       {formOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-6">
           <div className="bg-white p-6 rounded-xl w-full max-w-lg shadow-lg max-h-[90vh] overflow-y-auto relative">
@@ -297,7 +275,7 @@ export default function AdminPaket() {
               {/* Harga */}
               <div>
                 <label className="block mb-1 text-[#1c4444] font-medium">
-                  Harga Paket
+                  Harga
                 </label>
                 <input
                   type="number"
@@ -313,7 +291,7 @@ export default function AdminPaket() {
                 />
               </div>
 
-              {/* Destinations */}
+              {/* Destinasi */}
               <div>
                 <label className="block mb-1 text-[#1c4444] font-medium">
                   Pilih Destinasi
@@ -373,7 +351,7 @@ export default function AdminPaket() {
                 />
               </div>
 
-              {/* Upload Foto */}
+              {/* Gambar */}
               <div>
                 <label className="block mb-1 text-[#1c4444] font-medium">
                   Upload Foto
@@ -381,7 +359,7 @@ export default function AdminPaket() {
                 <input
                   type="file"
                   accept="image/*"
-                  className="w-full p-2 border rounded-lg"
+                  className="w-full p-2 border rounded"
                   onChange={handleImageUpload}
                 />
               </div>
@@ -389,22 +367,22 @@ export default function AdminPaket() {
               {formData.gambar && (
                 <img
                   src={formData.gambar}
-                  alt="Preview"
-                  className="w-40 h-28 object-cover rounded-lg border mt-2"
+                  className="w-40 h-28 rounded-lg border object-cover"
                 />
               )}
 
               <div className="flex justify-end gap-4 pt-4">
                 <button
                   type="submit"
-                  className="bg-[#1c4444] text-white px-4 py-2 rounded-lg hover:bg-[#163737]"
+                  className="bg-[#1c4444] text-white px-4 py-2 rounded-lg"
                 >
                   Simpan
                 </button>
+
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500"
+                  className="bg-gray-400 text-white px-4 py-2 rounded-lg"
                 >
                   Batal
                 </button>
